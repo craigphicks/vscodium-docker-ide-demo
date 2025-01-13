@@ -46,9 +46,7 @@ RUN echo "if [ ! -z \"\${VSCODE_IPC_HOOK_CLI}\" ] && [ -t 0 ]; then" >> /${USERN
 #   If VSCODE_IPC_HOOK_CLI is defined in the current enviroment 
 #   and stdin is a TTY
 
-# Could the problem be in 
-# .../files/share/codium/resources/app/out/vs/workbench/contrib/terminal/common/scripts/shellIntegration-bash.sh
-# ?
+# Issue filed: https://github.com/jeanp413/open-remote-ssh/issues/186
 ############ End of Workaround                                         ############
 
 # enable saving history on mounted directory even if container is rebuilt

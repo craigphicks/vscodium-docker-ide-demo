@@ -1,8 +1,6 @@
 VSCodium / SSH / Docker Container IDE Demo
 ------------------------------------------
 
-<!-- image goes here -->
-
 ## 1. Overview
 
 *vscodium-docker-ide-demo* is a demonstration of how to use VSCodium to connect via SSH to a Docker container, enabling an integrated development environment (IDE). It parallels the behavior of running VSCode with the Microsoft Devcontainer extension.
@@ -287,8 +285,8 @@ You may also access the container from a host terminal outside of VSCodium.
 You may be used to using `docker attach ...` to access a running container. However, this will not work with the container running SSHD as the final command. Instead:
 ```bash
 host-terminal$ docker exec -it vscodium-docker-ide-demo /bin/bash
-root@8376824da328:/# python3 -c "import numpy"
-root@8376824da328:/#
+root@8376824da328:/$ python3 -c "import numpy"
+root@8376824da328:/$ 
 ```
 
 ### 2.12 Stopping and Restarting Docker Container
@@ -301,15 +299,15 @@ docker start vscodium-docker-ide-demo
 
 `docker rm` can be used to remove the container once it is stopped. `docker rmi` can be used to remove an image if no existing containers depend on it.
 
-## 3. Workaround for VSCodium Terminal Environment Problem
+## 3 Workaround for VSCodium Terminal Environment Problem
 
-When VSCodium connects to the Docker container via SSH, the shell environment variables (including PATH) in the terminal window would be incorrect - if it were not for the workaround implemented in the `.docker.d/Dockerfile` (shown below) in the *vscodium-docker-ide-demo* repository.
+When VSCodium connects to the Docker container via SSH, the shell environment variables (including PATH) in the terminal window would be incorrect if it were not for the workaround implemented in the `.docker.d/Dockerfile` (shown below) in the *vscodium-docker-ide-demo* repository.
 
-It seems that VSCodium is clobbering the environment in the terminal window, replacing it with an entirely different environment. 
+It seems that VSCodium is clobbering the environment in the terminal window, replacing it with an entirely different environment.
 
-The workaround is to save the e at Docker build time in a file `~/root/buildtime_env`, and then read that file back into the environment from the `.bashrc` file.
+The workaround is to save the environment at Docker build time in a file `~/root/buildtime_env`, and then read that file back into the environment from the `.bashrc` file.
 
-This is the  code in the file `.docker.d/Dockerfile` for the workaround, which includes the detailed comments:
+This is the code in the file `.docker.d/Dockerfile` for the workaround, which includes detailed comments:
 ```Dockerfile
 ############ Workaround so the VSCODE terminals (inside the container) ############
 ############ have the correct environment (E.g., PATH)                 ############
@@ -333,9 +331,10 @@ RUN echo "if [ ! -z \"\${VSCODE_IPC_HOOK_CLI}\" ] && [ -t 0 ]; then" >> /${USERN
 #   If VSCODE_IPC_HOOK_CLI is defined in the current enviroment 
 #   and stdin is a TTY
 
-# Could the problem be in 
-# .../files/share/codium/resources/app/out/vs/workbench/contrib/terminal/common/scripts/shellIntegration-bash.sh
-# ?
+# Issue filed: https://github.com/jeanp413/open-remote-ssh/issues/186
 ############ End of Workaround                                         ############
 ```
 
+## 4 References
+
+The blog [Develop in Containers with VSCodium" by David Sebek](https://howtos.davidsebek.com/vscodium-containers.html) was a useful starting point while developing this project.
