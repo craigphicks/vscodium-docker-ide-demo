@@ -31,3 +31,8 @@ sleep 1
 
 ./build-run-ide.sh --no-build secret
 check_exit_status 0 $? "./build-run-ide.sh --no-build secret" || exit $?
+
+sleep 1
+
+./test-expect.sh
+check_exit_status 0 $? "test TEXT_ENV_VAR exists on container" || exit $?

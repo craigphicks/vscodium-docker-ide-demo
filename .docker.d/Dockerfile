@@ -24,8 +24,11 @@ RUN echo "$USERNAME:${ONE_TIME_PASSWD}" | chpasswd;
 EXPOSE 22
 
 
-############ Workaround so the VSCODE terminals (inside the container) ############
-############ have the correct environment (E.g., PATH)                 ############
+############ Workaround so ssh involked terminals ############
+############ have the same values as during DOCKERFILE (e.g. PATH, LD_PATH) ############
+
+# A test variable
+ENV TEST_ENV_VAR="test-env-value"
 
 # Save the build time environment variables to a file `buildtime_env`.
 # Some variables are ommitted
@@ -34,19 +37,12 @@ RUN env | grep -v -E "^(SHLVL|ONE_TIME_PASSWD|PWD|HOME|HOMEDIR)=" > /${USERNAME}
 # Add some code to `~/.bashrc` which will read the content of `buildtime_env` 
 # and add those variables into the current shell environment.
 
-RUN echo "if [ ! -z \"\${VSCODE_IPC_HOOK_CLI}\" ] && [ -t 0 ]; then" >> /${USERNAME}/.bashrc && \
-    echo "  while IFS='=' read -r key value; do" >> /${USERNAME}/.bashrc && \
-    echo "    if [[ \$key =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]] && [[ \$value =~ ^[[:print:]]*$ ]]; then" >> /${USERNAME}/.bashrc && \
-    echo "      export \"\$key=\$value\"" >> /${USERNAME}/.bashrc && \
-    echo "    fi" >> /${USERNAME}/.bashrc && \
-    echo "  done < /${USERNAME}/buildtime_env" >> /${USERNAME}/.bashrc && \
-    echo "fi" >> /${USERNAME}/.bashrc
+RUN echo "while IFS='=' read -r key value; do" >> /${USERNAME}/.bashrc && \
+    echo "  if [[ \$key =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]] && [[ \$value =~ ^[[:print:]]*$ ]]; then" >> /${USERNAME}/.bashrc && \
+    echo "    export \"\$key=\$value\"" >> /${USERNAME}/.bashrc && \
+    echo "  fi" >> /${USERNAME}/.bashrc && \
+    echo "done < /${USERNAME}/buildtime_env" >> /${USERNAME}/.bashrc
 
-# The condition `[ ! -z \"\${VSCODE_IPC_HOOK_CLI}\" ] && [ -t 0 ]` says:
-#   If VSCODE_IPC_HOOK_CLI is defined in the current enviroment 
-#   and stdin is a TTY
-
-# Issue filed: https://github.com/jeanp413/open-remote-ssh/issues/186
 ############ End of Workaround                                         ############
 
 # enable saving history on mounted directory even if container is rebuilt
